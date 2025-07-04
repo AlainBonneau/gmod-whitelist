@@ -7,7 +7,7 @@
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/server.js",
-    "generate": "python src/generate_jobs_mapping.py"
+    "generate:mapping": "python src/generate_jobs_mapping.py"
   },
   "keywords": [],
   "author": "",

@@ -1,35 +1,31 @@
 import re
 
-# Chemin vers ton jobs.lua
-LUA_PATH = "jobs.lua"
-TS_PATH = "jobs_mapping.ts"
+jobs_lua_path = "jobs.lua"    # Adapter le chemin si besoin
+output_path = "jobs_mapping.ts"
 
-with open(LUA_PATH, encoding="utf-8") as f:
-    content = f.read()
+job_pattern = re.compile(r'DarkRP\.createJob\("([^"]+)",\s*{')
+jobs = []
 
-# Regex pour trouver tous les jobs
-job_blocks = re.findall(
-    r'DarkRP\.createJob\("([^"]+)",\s*\{(.*?)\}\)', content, re.DOTALL
-)
+with open(jobs_lua_path, encoding="utf-8") as f:
+    lua_content = f.read()
 
-mapping = {}
+for match in job_pattern.finditer(lua_content):
+    job_name = match.group(1)
+    jobs.append(job_name)
 
-for name, block in job_blocks:
-    match = re.search(r'command\s*=\s*"([^"]+)"', block)
-    if match:
-        command = match.group(1)
-        mapping[command] = name
+# On suppose que l'ID = position dans la liste + premier ID (parfois 1, parfois 0, parfois 2)
+# Pour savoir à partir de combien commence l'ID dans ta BDD, regarde le plus petit job_id de ta table
 
-# Générer le code TypeScript
-ts_lines = [
-    "// Ce fichier est généré automatiquement, ne pas modifier à la main.",
-    "export const JOBS_MAPPING: Record<string, string> = {"
-]
-for cmd, name in mapping.items():
-    ts_lines.append(f'    "{cmd}": "{name}",')
-ts_lines.append("};\n")
+FIRST_ID = 4  # Adapter selon le premier job_id de ta BDD
+mapping_lines = []
 
-with open(TS_PATH, "w", encoding="utf-8") as f:
-    f.write('\n'.join(ts_lines))
+for idx, job_name in enumerate(jobs):
+    mapping_lines.append(f'  {FIRST_ID + idx}: "{job_name}"')
 
-print(f"Mapping généré ({len(mapping)} jobs) dans {TS_PATH} ✅")
+with open(output_path, "w", encoding="utf-8") as f:
+    f.write("// Auto-generated jobs mapping\n")
+    f.write("export const jobsMapping = {\n")
+    f.write(",\n".join(mapping_lines))
+    f.write("\n} as const;\n")
+
+print(f"Mapping généré ({len(jobs)} jobs) dans {output_path} ✅")
