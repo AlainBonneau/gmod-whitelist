@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../db/index.js";
+import { JOBS_MAPPING } from "../jobs_mapping.js";
 
 export const getAllWhitelists = async (req: Request, res: Response) => {
   try {
