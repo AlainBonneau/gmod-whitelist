@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to MyBad API!");
 });
 
-app.use("/whitelist", whitelistRoutes);
-app.use("/players", playerRoutes);
+app.use(whitelistRoutes);
+app.use(playerRoutes);
 
 export default app;
