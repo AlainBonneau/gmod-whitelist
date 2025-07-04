@@ -62,3 +62,39 @@ export const getWhitelistById = async (
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
+
+// Controlleur pour ajouter un job à la whitelist
+export const addJobToWhitelist = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { job_id, blacklist = 0 } = req.body;
+
+  if (!job_id) {
+    res.status(400).json({ error: "job_id requis" });
+    return;
+  }
+
+  try {
+    // On vérifie si le job existe déjà
+    const [rows] = await pool.query(
+      `SELECT * FROM srv1_gas_jobwhitelist_enabled_lists WHERE job_id = ?`,
+      [job_id]
+    );
+    if ((rows as any[]).length > 0) {
+      res.status(409).json({ error: "Ce job est déjà en whitelist" });
+      return;
+    }
+
+    // Ajout du métier dans la whitelist
+    await pool.query(
+      `INSERT INTO srv1_gas_jobwhitelist_enabled_lists (job_id, blacklist) VALUES (?, ?)`,
+      [job_id, blacklist]
+    );
+
+    res.json({ success: true, job_id, blacklist });
+  } catch (error) {
+    console.error("Impossible d'ajouter le job à la whitelist", error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
+};

@@ -280,27 +280,6 @@ TEAM_CITOYEN = DarkRP.createJob("Citoyen", {
     canDemote = false,
 })
 
-TEAM_LEGAL = DarkRP.createJob("Cuisinier", {
-    color = Color(30, 255, 0),
-    model = "models/fearless/chef1.mdl",
-    description = [[
-        Vous êtes cuisinier nourrissez la ville
-    ]],
-    weapons = {
-        "idcard",
-        "glorifiedbanking_card"
-    },
-    command = "cuisinier",
-    max = 4,
-    salary = 300,
-    admin = 0,
-    vote = false,
-    hasLicense = false,
-    category = "Service Publique",
-    canDemote = false,
-})
-
-
 TEAM_LEGAL = DarkRP.createJob("Banquier", {
     color = Color(30, 255, 0),
     model = "models/sentry/sentryoldmob/oldgoons/sentrybusi1male6pm.mdl",
@@ -314,6 +293,27 @@ TEAM_LEGAL = DarkRP.createJob("Banquier", {
     command = "banquier",
     max = 2,
     salary = 550,
+    admin = 0,
+    vote = false,
+    hasLicense = false,
+    category = "Service Publique",
+    canDemote = false,
+})
+
+TEAM_BITCOIN = DarkRP.createJob("Mineur de Bitcoin", {
+    color = Color(30, 255, 0),
+    model = {"models/fearless/dbsuit07.mdl",
+            "models/fearless/dbsuit09.mdl"},
+    description = [[
+        Vous pouvez miner du Bitcoin
+    ]],
+    weapons = {
+        "idcard",
+        "glorifiedbanking_card"
+    },
+    command = "mineurbitcoin",
+    max = 3,
+    salary = 300,
     admin = 0,
     vote = false,
     hasLicense = false,
@@ -340,6 +340,7 @@ TEAM_ARMURIER = DarkRP.createJob("Armurier", {
     category = "Service Publique",
     canDemote = false,
 })
+
 
 ------------------- Service Santé -------------------
 TEAM_SANTE = DarkRP.createJob("Medecin", {
