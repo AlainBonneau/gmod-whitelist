@@ -58,3 +58,32 @@ export const addPlayerToWhitelist = async (
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
+
+// Fonction pour supprimer un joueur de la whitelist d'un job spécifique
+export const removePlayerFromWhitelist = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { job_id, account_id } = req.body;
+  if (!job_id || !account_id) {
+    res.status(400).json({ error: "job_id et account_id requis" });
+    return;
+  }
+
+  try {
+    const [result] = await pool.query(
+      `DELETE FROM srv1_gas_jobwhitelist_listing WHERE job_id = ? AND account_id = ?`,
+      [job_id, account_id]
+    );
+
+    if ((result as any).affectedRows === 0) {
+      res.status(404).json({ error: "Aucune entrée trouvée à supprimer" });
+      return;
+    }
+
+    res.json({ success: true, deleted: (result as any).affectedRows });
+  } catch (error) {
+    console.error("Impossible de supprimer de la whitelist", error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
+};
