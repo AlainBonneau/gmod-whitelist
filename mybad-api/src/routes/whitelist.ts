@@ -4,7 +4,7 @@ import { getAllWhitelists, getWhitelistById } from "../controllers/whitelist.con
 const router = Router();
 
 // Route whitelist
-router.get("/whitelist", getAllWhitelists);
-router.get("/whitelist/:id", getWhitelistById);
+router.get("/", getAllWhitelists);
+router.get("/:id", getWhitelistById);
 
 export default router;
