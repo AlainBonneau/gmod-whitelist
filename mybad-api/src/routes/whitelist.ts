@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllWhitelists, getWhitelistById, addJobToWhitelist } from "../controllers/whitelist.controller.js";
+import { getAllWhitelists, getWhitelistById, addJobToWhitelist, removeJobFromWhitelist } from "../controllers/whitelist.controller.js";
 
 const router = Router();
 
@@ -7,5 +7,6 @@ const router = Router();
 router.get("/whitelist", getAllWhitelists);
 router.get("/whitelist/:id", getWhitelistById);
 router.post("/whitelist/add", addJobToWhitelist);
+router.delete("/whitelist/remove/:job_id", removeJobFromWhitelist);
 
 export default router;

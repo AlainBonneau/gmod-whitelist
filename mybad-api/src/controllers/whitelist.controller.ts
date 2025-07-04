@@ -76,7 +76,6 @@ export const addJobToWhitelist = async (
   }
 
   try {
-    // On vérifie si le job existe déjà
     const [rows] = await pool.query(
       `SELECT * FROM srv1_gas_jobwhitelist_enabled_lists WHERE job_id = ?`,
       [job_id]
@@ -86,7 +85,6 @@ export const addJobToWhitelist = async (
       return;
     }
 
-    // Ajout du métier dans la whitelist
     await pool.query(
       `INSERT INTO srv1_gas_jobwhitelist_enabled_lists (job_id, blacklist) VALUES (?, ?)`,
       [job_id, blacklist]
@@ -95,6 +93,36 @@ export const addJobToWhitelist = async (
     res.json({ success: true, job_id, blacklist });
   } catch (error) {
     console.error("Impossible d'ajouter le job à la whitelist", error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
+};
+
+// Controlleur pour supprimer un job de la whitelist
+export const removeJobFromWhitelist = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { job_id } = req.params;
+
+  if (!job_id) {
+    res.status(400).json({ error: "job_id requis" });
+    return;
+  }
+
+  try {
+    const [result] = await pool.query(
+      `DELETE FROM srv1_gas_jobwhitelist_enabled_lists WHERE job_id = ?`,
+      [job_id]
+    );
+
+    if ((result as any).affectedRows === 0) {
+      res.status(404).json({ error: "Job non trouvé dans la whitelist" });
+      return;
+    }
+
+    res.json({ success: true, job_id: Number(job_id) });
+  } catch (error) {
+    console.error("Impossible de supprimer le job de la whitelist", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
