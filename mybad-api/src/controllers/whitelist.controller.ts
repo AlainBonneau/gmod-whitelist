@@ -3,7 +3,9 @@ import pool from "../db/index.js";
 
 export const getAllWhitelists = async (req: Request, res: Response) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM whitelist");
+    const [rows] = await pool.query(
+      "SELECT * FROM srv1_gas_jobwhitelist_enabled_lists;"
+    );
     res.json(rows);
   } catch (error) {
     console.error("Impossible de fetch les données", error);
