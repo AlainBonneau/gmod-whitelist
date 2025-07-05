@@ -8,16 +8,20 @@ export const getAllWhitelists = async (
   res: Response
 ): Promise<void> => {
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM srv1_gas_jobwhitelist_enabled_lists;"
-    );
-    const whitelistsWithNames = (rows as any[]).map((row) => ({
-      ...row,
-      job_name:
-        jobsMapping[row.job_id as keyof typeof jobsMapping] || row.job_id,
-    }));
+    // const [jobs] = await pool.query("SELECT * FROM gas_job_registry");
+    // console.log("Jobs loaded:", jobs);
+    const [rows] = await pool.query(`
+      SELECT 
+        wl.job_id,
+        jr.name AS job_name,
+        wl.account_id,
+        p.nick
+      FROM srv1_gas_jobwhitelist_listing wl
+      JOIN gas_job_registry jr ON wl.job_id = jr.job_id
+      LEFT JOIN gas_offline_player_data p ON wl.account_id = p.account_id
+    `);
 
-    res.json(whitelistsWithNames);
+    res.json(rows);
   } catch (error) {
     console.error("Impossible de fetch les données", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
