@@ -1,15 +1,10 @@
--- This script synchronizes the job registry with a MySQL database.
--- It creates a table if it doesn't exist, truncates it, and inserts or updates job entries
--- based on the RPExtraTeams table from the server.
+-- Place ce fichier dans garrysmod/lua/autorun/server/gas_job_registry.lua
 
--- You have to put this script in your Garry's Mod Lua directory, typically under `garrysmod/lua/autorun/server/`.
-
--- Your configuration for MySQL connection
-local MYSQL_HOST = "your.mysql.host" -- Replace with your MySQL host
-local MYSQL_USER = "your_mysql_user" -- Replace with your MySQL username
-local MYSQL_PASS = "your_mysql_password" -- Replace with your MySQL password
-local MYSQL_DB   = "your_database_name" -- Replace with your MySQL database name
-local MYSQL_PORT = 3306 -- Replace with your MySQL port (default is 3306)
+local MYSQL_HOST = "your_database_host"       -- Ton host MySQL
+local MYSQL_USER = "your_sql_user"        -- Ton user MySQL
+local MYSQL_PASS = "your_sql_password" -- Ton mot de passe MySQL
+local MYSQL_DB   = "your_sql_database"    -- Ta base MySQL
+local MYSQL_PORT = 3306
 
 require("mysqloo")
 local db = mysqloo.connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT)
@@ -21,6 +16,7 @@ local function syncJobs()
         return
     end
 
+    -- Création de la table si elle existe pas
     local createTable = db:query([[
         CREATE TABLE IF NOT EXISTS gas_job_registry (
             job_id INT PRIMARY KEY,
@@ -29,10 +25,11 @@ local function syncJobs()
         )
     ]])
     createTable.onSuccess = function()
+        -- On vide la table avant de la remplir (très important pour garder la synchro !)
         local truncate = db:query("TRUNCATE TABLE gas_job_registry;")
         truncate.onSuccess = function()
             for _, job in ipairs(RPExtraTeams) do
-                local job_id = job.team -- L’ID global utilisé partout
+                local job_id = job.team -- CORRIGÉ : Utilise l'ID unique du métier !
                 local name = db:escape(job.name)
                 local command = db:escape(job.command or "")
                 local q = db:query(string.format(
@@ -46,17 +43,19 @@ local function syncJobs()
         end
         truncate:start()
     end
+    createTable.onError = function(_, err)
+        print("[gas_job_registry] Erreur création table: " .. tostring(err))
+    end
     createTable:start()
 end
 
 db.onConnected = function()
     print("[gas_job_registry] Connexion MySQL OK")
-    timer.Simple(10, syncJobs)
+    timer.Simple(10, syncJobs) -- On attend 10s que RPExtraTeams soit chargé
 end
+
 db.onConnectionFailed = function(_, err)
     print("[gas_job_registry] Échec connexion MySQL:", err)
 end
 
 db:connect()
-
--- Made by SparckyDev -- 
