@@ -1,4 +1,3 @@
-// player.controller.ts
 import { Request, Response } from "express";
 import pool from "../db/index.js";
 import { jobsMapping } from "../jobs_mapping.js";
