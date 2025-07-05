@@ -1,6 +1,8 @@
 import re
+import os
 
-jobs_lua_path = "jobs.lua"    # Adapter le chemin si besoin
+script_dir = os.path.dirname(os.path.abspath(__file__))
+jobs_lua_path = os.path.join(script_dir, "jobs.lua")
 output_path = "jobs_mapping.ts"
 
 job_pattern = re.compile(r'DarkRP\.createJob\("([^"]+)",\s*{')
