@@ -3,6 +3,10 @@ import cors from "cors";
 import whitelistRoutes from "./routes/whitelist.js";
 import playerRoutes from "./routes/players.js";
 
+// N'oubliez pas de créer un fichier .env à la racine de votre projet avec les variables d'environnement nécessaires. (Vous trouverez un exemple dans le fichier .env.example)
+
+// Don't forget to create a .env file at the root of your project with the necessary environment variables. (You will find an example in the .env.example file)
+
 const app = express();
 
 app.use(cors());

@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import pool from "../db/index.js";
 
+// Function to get all players in a job's whitelist
 // Fonction pour récupérer tous les joueurs dans la whitelist d'un job spécifique
 export const getAllPlayersInWhitelist = async (req: Request, res: Response) => {
-  const job_id = Number(req.params.job_id) - 1;
+  const job_id = Number(req.params.job_id);
   if (isNaN(job_id)) {
     res.status(400).json({ error: "job_id invalide" });
     return;
@@ -23,18 +24,14 @@ export const getAllPlayersInWhitelist = async (req: Request, res: Response) => {
       [job_id]
     );
 
-    res.json(
-      (rows as any[]).map((row) => ({
-        ...row,
-        job_id: row.job_id + 1,
-      }))
-    );
+    res.json(rows);
   } catch (error) {
     console.error("Impossible de récupérer les joueurs", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
 
+// Function to add a specific player in a job's whitelist
 // Fonction pour ajouter un joueur à la whitelist d'un job spécifique
 export const addPlayerToWhitelist = async (
   req: Request,
@@ -45,7 +42,7 @@ export const addPlayerToWhitelist = async (
     res.status(400).json({ error: "job_id et account_id requis" });
     return;
   }
-  job_id = Number(job_id) - 1;
+  job_id = Number(job_id);
 
   try {
     const [result] = await pool.query(
@@ -66,6 +63,7 @@ export const addPlayerToWhitelist = async (
   }
 };
 
+// Function to remove a specific player from a job's whitelist
 // Fonction pour supprimer un joueur de la whitelist d'un job spécifique
 export const removePlayerFromWhitelist = async (
   req: Request,
@@ -76,7 +74,7 @@ export const removePlayerFromWhitelist = async (
     res.status(400).json({ error: "job_id et account_id requis" });
     return;
   }
-  job_id = Number(job_id) - 1;
+  job_id = Number(job_id);
 
   try {
     const [result] = await pool.query(

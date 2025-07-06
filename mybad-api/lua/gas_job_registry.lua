@@ -1,9 +1,11 @@
+-- [SparckyDev] Sync jobs to MySQL for API mapping [SparckyDev]
+-- Put this file in garrysmod/lua/autorun/server/gas_job_registry.lua
 -- Place ce fichier dans garrysmod/lua/autorun/server/gas_job_registry.lua
 
-local MYSQL_HOST = "your_database_host"       -- Ton host MySQL
-local MYSQL_USER = "your_sql_user"        -- Ton user MySQL
-local MYSQL_PASS = "your_sql_password" -- Ton mot de passe MySQL
-local MYSQL_DB   = "your_sql_database"    -- Ta base MySQL
+local MYSQL_HOST = "your-mysql-host.com" -- Replace with your MySQL server address / Remplace par l'adresse de ton serveur MySQL
+local MYSQL_USER = "your_mysql_user" -- Replace with your MySQL username / Remplace par ton nom d'utilisateur MySQL
+local MYSQL_PASS = "your_mysql_password" -- Replace with your MySQL password / Remplace par ton mot de passe MySQL
+local MYSQL_DB   = "your_database_name" -- Replace with your MySQL database name / Remplace par le nom de ta base de données MySQL
 local MYSQL_PORT = 3306
 
 require("mysqloo")
@@ -24,12 +26,14 @@ local function syncJobs()
             command VARCHAR(255)
         )
     ]])
+
+    -- On supprime la table si elle existe déjà
     createTable.onSuccess = function()
-        -- On vide la table avant de la remplir (très important pour garder la synchro !)
         local truncate = db:query("TRUNCATE TABLE gas_job_registry;")
         truncate.onSuccess = function()
-            for _, job in ipairs(RPExtraTeams) do
-                local job_id = job.team -- CORRIGÉ : Utilise l'ID unique du métier !
+            for i, job in ipairs(RPExtraTeams) do
+                -- **** ICI ON UTILISE job.team ****
+                local job_id = job.team
                 local name = db:escape(job.name)
                 local command = db:escape(job.command or "")
                 local q = db:query(string.format(
@@ -43,6 +47,8 @@ local function syncJobs()
         end
         truncate:start()
     end
+
+    -- En cas d'erreur lors de la création de la table
     createTable.onError = function(_, err)
         print("[gas_job_registry] Erreur création table: " .. tostring(err))
     end
@@ -51,7 +57,7 @@ end
 
 db.onConnected = function()
     print("[gas_job_registry] Connexion MySQL OK")
-    timer.Simple(10, syncJobs) -- On attend 10s que RPExtraTeams soit chargé
+    timer.Simple(10, syncJobs)
 end
 
 db.onConnectionFailed = function(_, err)

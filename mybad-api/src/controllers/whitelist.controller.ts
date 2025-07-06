@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import pool from "../db/index.js";
 import { ResultSetHeader } from "mysql2/promise";
 
+// ATTTENTION : Vous aurez besoin de la table gas_job_registry pour que ce fichier fonctionne correctement, vous pouvez vous aidez du fichier gas_job_registry.lua  qui ce situe dans le dossier lua pour la créer. (Plus d'informations dans le fichier gas_job_registry.lua)
+
+// WARNING: You will need the table gas_job_registry for this file to work correctly. You can refer to the gas_job_registry.lua file located in the lua folder for its creation. (More information in the gas_job_registry.lua file)
+
+// Display all whitelists
 // Afficher toutes les whitelists
 export const getAllWhitelists = async (
   req: Request,
@@ -14,28 +19,24 @@ export const getAllWhitelists = async (
          wl.blacklist,
          jr.name AS job_name
        FROM srv1_gas_jobwhitelist_enabled_lists wl
-       LEFT JOIN gas_job_registry jr ON (wl.job_id + 1) = jr.job_id
+       LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
        ORDER BY wl.job_id ASC`
     );
-    res.json(
-      (rows as any[]).map((row) => ({
-        job_id: row.job_id + 1,
-        blacklist: row.blacklist,
-        job_name: row.job_name,
-      }))
-    );
+    res.json(rows);
+    console.log("Whitelists récupérées avec succès", rows);
   } catch (error) {
     console.error("Impossible de fetch les données", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
 
-// Afficher une whitelist par son ID (+1 affiché)
+// Display a whitelist by its ID
+// Afficher une whitelist par son ID
 export const getWhitelistById = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const jobId = parseInt(req.params.id, 10) - 1;
+  const jobId = parseInt(req.params.id, 10);
   if (isNaN(jobId)) {
     res.status(400).json({ error: "Paramètre id invalide" });
     return;
@@ -47,7 +48,7 @@ export const getWhitelistById = async (
          wl.blacklist,
          jr.name AS job_name
        FROM srv1_gas_jobwhitelist_enabled_lists wl
-       LEFT JOIN gas_job_registry jr ON (wl.job_id + 1) = jr.job_id
+       LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
        WHERE wl.job_id = ?`,
       [jobId]
     );
@@ -55,18 +56,14 @@ export const getWhitelistById = async (
       res.status(404).json({ error: "Whitelist non trouvée" });
       return;
     }
-    const row = (rows as any)[0];
-    res.json({
-      job_id: row.job_id + 1,
-      blacklist: row.blacklist,
-      job_name: row.job_name,
-    });
+    res.json((rows as any)[0]);
   } catch (error) {
     console.error("Impossible de fetch la donnée", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
 
+// Function to add a job to the whitelist
 // Ajouter un job à la whitelist
 export const addJobToWhitelist = async (
   req: Request,
@@ -79,7 +76,7 @@ export const addJobToWhitelist = async (
     return;
   }
 
-  job_id = Number(job_id) - 1;
+  job_id = Number(job_id);
 
   try {
     const [rows] = await pool.query(
@@ -96,13 +93,14 @@ export const addJobToWhitelist = async (
       [job_id, blacklist]
     );
 
-    res.json({ success: true, job_id: job_id + 1, blacklist });
+    res.json({ success: true, job_id, blacklist });
   } catch (error) {
     console.error("Impossible d'ajouter le job à la whitelist", error);
     res.status(500).json({ error: "Erreur interne du serveur" });
   }
 };
 
+// Function to remove a job from the whitelist
 // Supprimer un job de la whitelist
 export const removeJobFromWhitelist = async (
   req: Request,
@@ -115,7 +113,7 @@ export const removeJobFromWhitelist = async (
     return;
   }
 
-  const jobId = Number(jobIdParam) - 1;
+  const jobId = Number(jobIdParam);
 
   if (isNaN(jobId)) {
     res.status(400).json({ error: "job_id doit être un nombre valide" });
@@ -136,7 +134,7 @@ export const removeJobFromWhitelist = async (
     res.json({
       success: true,
       message: "Job supprimé de la whitelist",
-      job_id: jobId + 1,
+      job_id: jobId,
     });
   } catch (error) {
     console.error("Impossible de supprimer le job", error);
