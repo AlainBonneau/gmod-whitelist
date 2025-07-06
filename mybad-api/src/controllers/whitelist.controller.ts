@@ -1,12 +1,9 @@
+// whitelist.controller.ts
+
 import { Request, Response } from "express";
 import pool from "../db/index.js";
 import { ResultSetHeader } from "mysql2/promise";
 
-// ATTTENTION : Vous aurez besoin de la table gas_job_registry pour que ce fichier fonctionne correctement, vous pouvez vous aidez du fichier gas_job_registry.lua  qui ce situe dans le dossier lua pour la créer. (Plus d'informations dans le fichier gas_job_registry.lua)
-
-// WARNING: You will need the table gas_job_registry for this file to work correctly. You can refer to the gas_job_registry.lua file located in the lua folder for its creation. (More information in the gas_job_registry.lua file)
-
-// Display all whitelists
 // Afficher toutes les whitelists
 export const getAllWhitelists = async (
   req: Request,
@@ -15,11 +12,12 @@ export const getAllWhitelists = async (
   try {
     const [rows] = await pool.query(
       `SELECT 
-         (wl.job_id + 1) AS job_id,
+         wl.job_id,
          wl.blacklist,
-         jr.name AS job_name
+         jr.name AS job_name,
+         jr.command AS job_command
        FROM srv1_gas_jobwhitelist_enabled_lists wl
-       LEFT JOIN gas_job_registry jr ON (wl.job_id + 1) = jr.job_id
+       LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
        ORDER BY wl.job_id ASC`
     );
     res.json(rows);
@@ -30,8 +28,7 @@ export const getAllWhitelists = async (
   }
 };
 
-// Display a whitelist by its ID
-// Afficher une whitelist par son ID
+// Afficher une whitelist par son job_id (PAS un index de tableau, mais bien le job_id SQL/GMod !)
 export const getWhitelistById = async (
   req: Request,
   res: Response
@@ -46,10 +43,11 @@ export const getWhitelistById = async (
       `SELECT 
          wl.job_id,
          wl.blacklist,
-         jr.name AS job_name
+         jr.name AS job_name,
+         jr.command AS job_command
        FROM srv1_gas_jobwhitelist_enabled_lists wl
        LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
-       WHERE (wl.job_id + 1) = ?`,
+       WHERE wl.job_id = ?`,
       [jobId]
     );
     if ((rows as any[]).length === 0) {
@@ -63,7 +61,6 @@ export const getWhitelistById = async (
   }
 };
 
-// Function to add a job to the whitelist
 // Ajouter un job à la whitelist
 export const addJobToWhitelist = async (
   req: Request,
@@ -100,7 +97,6 @@ export const addJobToWhitelist = async (
   }
 };
 
-// Function to remove a job from the whitelist
 // Supprimer un job de la whitelist
 export const removeJobFromWhitelist = async (
   req: Request,
