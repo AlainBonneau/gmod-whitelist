@@ -20,7 +20,7 @@ export const getAllPlayersInWhitelist = async (req: Request, res: Response) => {
         l.job_id
       FROM srv1_gas_jobwhitelist_listing l
       LEFT JOIN gas_offline_player_data d ON l.account_id = d.account_id
-      WHERE l.job_id = ?;`,
+      WHERE (l.job_id + 1) = ?;`,
       [job_id]
     );
 

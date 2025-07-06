@@ -15,11 +15,11 @@ export const getAllWhitelists = async (
   try {
     const [rows] = await pool.query(
       `SELECT 
-         wl.job_id,
+         (wl.job_id + 1) AS job_id,
          wl.blacklist,
          jr.name AS job_name
        FROM srv1_gas_jobwhitelist_enabled_lists wl
-       LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
+       LEFT JOIN gas_job_registry jr ON (wl.job_id + 1) = jr.job_id
        ORDER BY wl.job_id ASC`
     );
     res.json(rows);
@@ -49,7 +49,7 @@ export const getWhitelistById = async (
          jr.name AS job_name
        FROM srv1_gas_jobwhitelist_enabled_lists wl
        LEFT JOIN gas_job_registry jr ON wl.job_id = jr.job_id
-       WHERE wl.job_id = ?`,
+       WHERE (wl.job_id + 1) = ?`,
       [jobId]
     );
     if ((rows as any[]).length === 0) {
